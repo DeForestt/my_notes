@@ -64,11 +64,11 @@ To use `My Notes`, follow these steps:
 `My Notes` v0.1.0
 
 ## Support
-For any issues or questions, please open an [issue on GitHub](https://github.com/your-repo/issues).
+For any issues or questions, please open an [issue on GitHub](https://github.com/DeForestt/my_notes/issues).
 
 ## License
 This app is released under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
-*Note: Replace placeholders (`<path>`, `your-repo`) with actual values.*
+*Note: Replace placeholders (`<path>`) with actual values.*
