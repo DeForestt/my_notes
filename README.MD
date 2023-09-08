@@ -19,7 +19,7 @@ To use `My Notes`, follow these steps:
 
 4. **Script install**
    - Run the following to install via script.
-    wget -O - https://raw.githubusercontent.com/DeForestt/my_notes/main/install.sh | sudo bash
+    `wget -O - https://raw.githubusercontent.com/DeForestt/my_notes/main/install.sh | sudo bash`
 
 ## Usage
 `my-notes [SUBCOMMAND] [OPTIONS]`
