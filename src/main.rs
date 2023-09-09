@@ -5,7 +5,6 @@ use std::{
     process::Command
 };
 
-
 use cli::{Cli, Commands};
 use note::Note;
 use clap::Parser;
@@ -168,6 +167,22 @@ fn delete_note(path: &String) {
     index.save(&index_path);
 }
 
+fn search_notes(query: &String) {
+    let home_dir = var("HOME").expect("Could not get home directory");
+    let note_dir = format!("{}/.notes", &home_dir);
+    let index_path = format!("{}/index.json", &note_dir);
+
+    create_dir_all(&note_dir).expect("Could not create save path");
+
+    let index = Note::new(&index_path);
+
+    let results = index.key_word_search(query.to_uppercase().as_str());
+
+    for result in results {
+        println!("{}", result);
+    }
+}
+
 fn main() {
     let cli: Cli = Cli::parse();
 
@@ -192,6 +207,9 @@ fn main() {
                 return;
             }
             delete_note(path);
+        },
+        Commands::Search { query } => {
+            search_notes(query);
         },
     }
 }

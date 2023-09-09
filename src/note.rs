@@ -155,4 +155,21 @@ impl Note {
         parent.children.retain(|child| child.title != child_name);
         return Ok(());
     }
+
+    pub fn key_word_search(&self, key_word: &str) -> Vec<String> {
+        let mut path_list: Vec<String> = Vec::new();
+        if self.title.to_uppercase().contains(key_word) {
+            // remove .md from the end of the file path
+            let mut file_path = self.file_path.clone();
+            file_path.truncate(file_path.len() - 3);
+            // remove everything before the last slash
+            let mut file_path_parts: Vec<&str> = file_path.split("/").collect();
+            file_path = file_path_parts.pop().unwrap().to_string();
+            path_list.push(file_path);
+        }
+        for child in &self.children {
+            path_list.append(&mut child.key_word_search(key_word));
+        }
+        return path_list;
+    }
 }

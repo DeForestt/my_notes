@@ -25,4 +25,8 @@ pub enum Commands {
     Delete {
         path: String,
     },
+    #[clap(name = "search", about = "search notes")]
+    Search {
+        query: String,
+    },
 }
