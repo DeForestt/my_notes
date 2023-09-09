@@ -35,4 +35,8 @@ pub enum Commands {
     Search {
         query: String,
     },
+    #[clap(name = "echo", about = "echo a note")]
+    Echo {
+        path: String,
+    },
 }

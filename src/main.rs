@@ -129,6 +129,37 @@ fn edit_note(path: &String) {
 
 }
 
+fn echo_note_content(path: &String) {
+    let home_dir = var("HOME").expect("Could not get home directory");
+    let note_dir = format!("{}/.notes", &home_dir);
+    let index_path = format!("{}/index.json", &note_dir);
+
+    create_dir_all(&note_dir).expect("Could not create save path");
+
+    let mut note_path_parts: Vec<&str> = path.split(".").collect();
+    note_path_parts.insert(0, "MyNotesRoot");
+
+    let index = Note::new(&index_path);
+
+    let note = match index.get_child(note_path_parts) {
+        Some(note) => note,
+        None => {
+            println!("Could not find note");
+            return;
+        },
+    };
+
+    let mut note_file = OpenOptions::new()
+        .read(true)
+        .open(note.get_file_path())
+        .expect("Could not open note file");
+
+    let mut note_content = String::new();
+    note_file.read_to_string(&mut note_content).expect("Could not read note file");
+
+    println!("{}", note_content);
+}
+
 fn delete_note(path: &String) {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
@@ -179,7 +210,7 @@ fn search_notes(query: &String) {
     let results = index.key_word_search(query.to_uppercase().as_str());
 
     for result in results {
-        println!("{}", result);
+        println!("{}\n", result);
     }
 }
 
@@ -221,11 +252,14 @@ fn main() {
                     return;
                 }
             }
-            
+
             delete_note(path);
         },
         Commands::Search { query } => {
             search_notes(query);
         },
+        Commands::Echo { path } => {
+            echo_note_content(path);
+        }
     }
 }

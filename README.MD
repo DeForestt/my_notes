@@ -39,6 +39,13 @@ To use `My Notes`, follow these steps:
   - Arguments
     - `-f` `--force` : boolean - force delete without confirmation
 - `search` - Find notes by keyword.
+  - Usage: `my-notes search <keyword>`
+- `echo` - Print the contents of a note.
+  - Usage: `my-notes echo <path>
+- `help` - Display help information.
+  - Usage: `my-notes help [SUBCOMMAND]`
+- `version` - Display version information.
+  - Usage: `my-notes version`
 
 ### Examples
 - Create a new note:
