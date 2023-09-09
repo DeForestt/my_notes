@@ -68,6 +68,22 @@ To use `My Notes`, follow these steps:
   ```
   my-notes rm my-note
   ```
+- Delete a note (without confirmation):
+  ```
+  my-notes rm my-note --force
+  ```
+- Find notes by keyword:
+  ```
+  my-notes search keyword
+  ```
+- Print the contents of a note:
+  ```
+  my-notes echo my-note
+  ```
+- Display help information:
+  ```
+  my-notes help
+  ```
 
 ## Notes
 - The app uses the default system editor. Set the `EDITOR` environment variable to change it.
