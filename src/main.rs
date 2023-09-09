@@ -187,10 +187,22 @@ fn main() {
     let cli: Cli = Cli::parse();
 
     match &cli.command {
-        Commands::New { path} => {
-            let file_path = create_temp_file();
-            let note_content = get_editor_content(&file_path);
-            save_note(path, &note_content);
+        Commands::New { path, content, blank} => {
+            if *blank {
+                save_note(path, "");
+                return;
+            }
+            match content {
+                Some(content) => {
+                    save_note(path, content);
+                    return;
+                },
+                None => {
+                    let file_path = create_temp_file();
+                    let note_content = get_editor_content(&file_path);
+                    save_note(path, &note_content);
+                }
+            }
         },
         Commands::List { path } => {
             list_tree(path);
@@ -198,14 +210,18 @@ fn main() {
         Commands::Edit { path } => {
             edit_note(path);
         },
-        Commands::Delete { path } => {
+        Commands::Delete { path, force } => {
+
             let mut input = String::new();
-            print!("Deleting this note will PERMANENTLY delete it and all of its children from the index and your local computer. Are you sure you want to continue? (y/N): ");
-            io::stdout().flush().unwrap();
-            std::io::stdin().read_line(&mut input).expect("Could not read input");
-            if input.to_lowercase().trim() != "y" {
-                return;
+            if !*force {
+                print!("Deleting this note will PERMANENTLY delete it and all of its children from the index and your local computer. Are you sure you want to continue? (y/N): ");
+                io::stdout().flush().unwrap();
+                std::io::stdin().read_line(&mut input).expect("Could not read input");
+                if input.to_lowercase().trim() != "y" {
+                    return;
+                }
             }
+            
             delete_note(path);
         },
         Commands::Search { query } => {

@@ -12,6 +12,10 @@ pub enum Commands {
     #[clap(name = "new", about = "create a new note")]
     New {
         path: String,
+        #[arg(short, long)]
+        content: Option<String>,
+        #[arg(short, long)]
+        blank: bool,
     },
     #[clap(name = "ls", about = "list notes")]
     List {
@@ -24,6 +28,8 @@ pub enum Commands {
     #[clap(name = "rm", about = "delete a note")]
     Delete {
         path: String,
+        #[arg(short, long)]
+        force: bool,
     },
     #[clap(name = "search", about = "search notes")]
     Search {

@@ -27,12 +27,18 @@ To use `My Notes`, follow these steps:
 ### Subcommands
 - `new` - Create a new note.
   - Usage: `my-notes new <path>`
+  - Arguments:
+    - `-c` `--content` : string - add inline content
+    - `-b` `--blank`: boolean - mark as a blank note
 - `ls` - List notes.
   - Usage: `my-notes ls [path]`
 - `edit` - Edit an existing note.
   - Usage: `my-notes edit <path>`
 - `rm` - Delete a note.
   - Usage: `my-notes rm <path>`
+  - Arguments
+    - `-f` `--force` : boolean - force delete without confirmation
+- `search` - Find notes by keyword.
 
 ### Examples
 - Create a new note:
