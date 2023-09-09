@@ -9,8 +9,8 @@ INSTALL_DIR="/usr/local/bin"
 # Download the release
 curl -LJO $DOWNLOAD_URL
 
-# Extract the binary (assuming it's a single file)
-tar -zxvf $FILENAME
+# Remove the old binary if it exists
+sudo rm -f $INSTALL_DIR/my-notes
 
 # Move the binary to the installation directory
 sudo mv my-notes $INSTALL_DIR
