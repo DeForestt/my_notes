@@ -17,10 +17,6 @@ To use `My Notes`, follow these steps:
 3. **Running the App**
    - After building, you can run the app using the generated binary.ß
 
-4. **Script install**
-   - Run the following to install via script.
-    `wget -O - https://raw.githubusercontent.com/DeForestt/my_notes/main/install.sh | sudo bash`
-
 ## Usage
 `my-notes [SUBCOMMAND] [OPTIONS]`
 
