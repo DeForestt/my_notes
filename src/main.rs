@@ -171,9 +171,12 @@ fn view_note_content(path: &String, raw: &bool) {
     let mut skin = termimad::MadSkin::default();
     skin.code_block.align = termimad::Alignment::Center;
     let markdown = get_note_content(path).expect("Could not get note content");
-    let area = termimad::Area::full_screen();
+    let mut area = termimad::Area::full_screen();
+    area.pad(1, 1);
+
     let view = termimad::MadView::from(markdown, area, skin);
     view.write().expect("Could not write to view");
+    print!("");
 }
 
 fn delete_note(path: &String) {
