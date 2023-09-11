@@ -103,9 +103,9 @@ impl Note {
         return Ok("Success");
     }
 
-    pub fn print_tree(&self, indent: usize) {
+    pub fn print_tree(&self, indent: usize) -> () {
         if self.title != "MyNotesRoot" {
-            print!("{}", self.title);
+            print!("- {}", self.title);
         };
         for child in &self.children {
             println!();
