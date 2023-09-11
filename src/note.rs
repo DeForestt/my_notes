@@ -106,7 +106,7 @@ impl Note {
     pub fn print_tree(&self, indent: usize) -> () {
         if self.title != "MyNotesRoot" {
             print!("- {}", self.title);
-        };
+        }
         for child in &self.children {
             println!();
             for _ in 0..indent {

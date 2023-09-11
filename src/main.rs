@@ -2,7 +2,7 @@ use std::{
     env::{temp_dir, var},
     fs::{File, create_dir_all, OpenOptions, write},
     io::{Read, self, Write},
-    process::Command
+    process::Command,
 };
 
 use cli::{Cli, Commands};
@@ -129,7 +129,7 @@ fn edit_note(path: &String) {
 
 }
 
-fn echo_note_content(path: &String) {
+fn get_note_content(path: &String) -> Option<String> {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
     let index_path = format!("{}/index.json", &note_dir);
@@ -144,11 +144,9 @@ fn echo_note_content(path: &String) {
     let note = match index.get_child(note_path_parts) {
         Some(note) => note,
         None => {
-            println!("Could not find note");
-            return;
+            return None;
         },
     };
-
     let mut note_file = OpenOptions::new()
         .read(true)
         .open(note.get_file_path())
@@ -157,7 +155,25 @@ fn echo_note_content(path: &String) {
     let mut note_content = String::new();
     note_file.read_to_string(&mut note_content).expect("Could not read note file");
 
-    println!("{}", note_content);
+    Some(note_content)
+}
+
+fn echo_note_content(path: &String) {
+    println!("{}", get_note_content(path).expect("Could not get note content"));
+}
+
+fn view_note_content(path: &String, raw: &bool) {
+    if *raw {
+        println!("{}", get_note_content(path).expect("Could not get note content"));
+        return;
+    }
+
+    let mut skin = termimad::MadSkin::default();
+    skin.code_block.align = termimad::Alignment::Center;
+    let markdown = get_note_content(path).expect("Could not get note content");
+    let area = termimad::Area::full_screen();
+    let view = termimad::MadView::from(markdown, area, skin);
+    view.write().expect("Could not write to view");
 }
 
 fn delete_note(path: &String) {
@@ -260,6 +276,9 @@ fn main() {
         },
         Commands::Echo { path } => {
             echo_note_content(path);
-        }
+        },
+        Commands::View { path, raw } => {
+            view_note_content(path, raw);
+        },
     }
 }
