@@ -39,10 +39,4 @@ pub enum Commands {
     Echo {
         path: String,
     },
-    #[clap(name = "view", about = "view a note")]
-    View {
-        path: String,
-        #[arg(short, long)]
-        raw: bool,
-    },
 }

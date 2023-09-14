@@ -38,8 +38,6 @@ To use `My Notes`, follow these steps:
   - Usage: `my-notes search <keyword>`
 - `echo` - Print the contents of a note.
   - Usage: `my-notes echo <path>
-- `view` - View a note using markdown rendering.
-  - Usage: `my-notes view <path>`
 - `help` - Display help information.
   - Usage: `my-notes help [SUBCOMMAND]`
 - `version` - Display version information.

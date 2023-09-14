@@ -162,23 +162,6 @@ fn echo_note_content(path: &String) {
     println!("{}", get_note_content(path).expect("Could not get note content"));
 }
 
-fn view_note_content(path: &String, raw: &bool) {
-    if *raw {
-        println!("{}", get_note_content(path).expect("Could not get note content"));
-        return;
-    }
-
-    let mut skin = termimad::MadSkin::default();
-    skin.code_block.align = termimad::Alignment::Center;
-    let markdown = get_note_content(path).expect("Could not get note content");
-    let mut area = termimad::Area::full_screen();
-    area.pad(1, 1);
-
-    let view = termimad::MadView::from(markdown, area, skin);
-    view.write().expect("Could not write to view");
-    print!("");
-}
-
 fn delete_note(path: &String) {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
@@ -279,9 +262,6 @@ fn main() {
         },
         Commands::Echo { path } => {
             echo_note_content(path);
-        },
-        Commands::View { path, raw } => {
-            view_note_content(path, raw);
         },
     }
 }
