@@ -37,7 +37,7 @@ To use `My Notes`, follow these steps:
 - `search` - Find notes by keyword.
   - Usage: `my-notes search <keyword>`
 - `echo` - Print the contents of a note.
-  - Usage: `my-notes echo <path>
+  - Usage: `my-notes echo <path>`ß
 - `help` - Display help information.
   - Usage: `my-notes help [SUBCOMMAND]`
 - `version` - Display version information.
