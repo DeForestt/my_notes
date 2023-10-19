@@ -162,6 +162,10 @@ fn echo_note_content(path: &String) {
     println!("{}", get_note_content(path).expect("Could not get note content"));
 }
 
+fn view_note_content(path: &String) {
+    termimad::print_text(&get_note_content(path).expect("Could not get note content"));
+}
+
 fn delete_note(path: &String) {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
@@ -262,6 +266,9 @@ fn main() {
         },
         Commands::Echo { path } => {
             echo_note_content(path);
+        },
+        Commands::View { path } => {
+            view_note_content(path);
         },
     }
 }

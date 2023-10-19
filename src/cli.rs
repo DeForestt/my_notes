@@ -28,7 +28,7 @@ pub enum Commands {
     #[clap(name = "rm", about = "delete a note")]
     Delete {
         path: String,
-        #[arg(short, long)]
+        #[arg(short, long, default_value = "false", help = "delete without confirmation messages **DANGER**")]
         force: bool,
     },
     #[clap(name = "search", about = "search notes")]
@@ -37,6 +37,10 @@ pub enum Commands {
     },
     #[clap(name = "echo", about = "echo a note")]
     Echo {
+        path: String,
+    },
+    #[clap(name = "view", about = "view a note with rendered markdown")]
+    View {
         path: String,
     },
 }
