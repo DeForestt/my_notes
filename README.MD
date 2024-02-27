@@ -42,6 +42,8 @@ To use `My Notes`, follow these steps:
   - Usage: `my-notes help [SUBCOMMAND]`
 - `version` - Display version information.
   - Usage: `my-notes version`
+- `view` - View a note with rendered markdown.
+  - Usage: `my-notes view <path>`
 
 ### Examples
 - Create a new note:
@@ -75,6 +77,14 @@ To use `My Notes`, follow these steps:
 - Print the contents of a note:
   ```
   my-notes echo my-note
+  ```
+- View a note with rendered markdown:
+  ```
+  my-notes view my-note
+  ```
+- Display version information:
+  ```
+  my-notes version
   ```
 - Display help information:
   ```
