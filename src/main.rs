@@ -1,8 +1,5 @@
 use std::{
-    env::{temp_dir, var},
-    fs::{create_dir_all, write, File, OpenOptions},
-    io::{self, Read, Write},
-    process::Command,
+    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command
 };
 
 use cli::{Cli, Commands};
@@ -75,34 +72,7 @@ fn save_note(path: &str, note_content: &str) {
     note_file.write_all(note_content.as_bytes()).expect("Could not write to note file");
 }
 
-fn list_tree(path: &Option<String>) {   
-    let home_dir = var("HOME").expect("Could not get home directory");
-    let note_dir = format!("{}/.notes", &home_dir);
-    let index_path = format!("{}/index.json", &note_dir);
-
-    create_dir_all(&note_dir).expect("Could not create save path");
-    let index = Note::new(&index_path);
-
-    let root: &Note = match path {
-        Some(path) => {
-            let mut note_path_parts: Vec<&str> = path.split(".").collect();
-            note_path_parts.insert(0, "MyNotesRoot");
-            match index.get_child(note_path_parts) {
-                Some(note) => note,
-                None => {
-                    println!("Could not find note");
-                    return;
-                },
-            }
-        },
-        None => &index,
-    };
-
-    root.print_tree(0);
-    println!("");
-}
-
-fn edit_note(path: &String) {
+fn get_note(path: &String) -> Option<Note> {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
     let index_path = format!("{}/index.json", &note_dir);
@@ -114,56 +84,92 @@ fn edit_note(path: &String) {
 
     let index = Note::new(&index_path);
 
-    let note = match index.get_child(note_path_parts) {
+    match index.get_child(note_path_parts) {
+        Some(note) => Some(note.clone()),
+        None => None,
+    }
+}
+
+fn get_note_or_index(path: &Option<String>) -> Option<Note> {
+    let home_dir = var("HOME").expect("Could not get home directory");
+    let note_dir = format!("{}/.notes", &home_dir);
+    let index_path = format!("{}/index.json", &note_dir);
+
+    create_dir_all(&note_dir).expect("Could not create save path");
+
+    let index = Note::new(&index_path);
+
+    match path {
+        Some(path) => get_note(path),
+        None => Some(index),
+    }
+}
+
+fn list_tree(path: &Option<String>) {   
+    match get_note_or_index(path) {
+        Some(note) => {
+            note.print_tree(0);
+            println!("");
+        },
+        None => {
+            println!("No notes found at path: {:?}", path);
+        },
+    }
+}
+
+fn edit_note(path: &String) {
+    let note = match get_note(path) {
         Some(note) => note,
         None => {
-            println!("Could not find note");
+            println!("No note found at path: {:?}", path);
             return;
         },
     };
 
     let note_content = get_editor_content(note.get_file_path());
-    
     write(note.get_file_path(), note_content).expect("Could not write to note file");
-
-
 }
 
 fn get_note_content(path: &String) -> Option<String> {
-    let home_dir = var("HOME").expect("Could not get home directory");
-    let note_dir = format!("{}/.notes", &home_dir);
-    let index_path = format!("{}/index.json", &note_dir);
-
-    create_dir_all(&note_dir).expect("Could not create save path");
-
-    let mut note_path_parts: Vec<&str> = path.split(".").collect();
-    note_path_parts.insert(0, "MyNotesRoot");
-
-    let index = Note::new(&index_path);
-
-    let note = match index.get_child(note_path_parts) {
+    let note = match get_note(path) {
         Some(note) => note,
         None => {
             return None;
         },
     };
+
     let mut note_file = OpenOptions::new()
         .read(true)
         .open(note.get_file_path())
         .expect("Could not open note file");
 
     let mut note_content = String::new();
-    note_file.read_to_string(&mut note_content).expect("Could not read note file");
+   match note_file.read_to_string(&mut note_content) {
+        Ok(_) => {},
+        Err(e) => {
+            println!("Could not read note: {}", e);
+            return None;
+        },
+    };
 
     Some(note_content)
 }
 
 fn echo_note_content(path: &String) {
+    match get_note_content(path) {
+        Some(content) => println!("{}", content),
+        None => println!("Could not get note content"),
+    }
     println!("{}", get_note_content(path).expect("Could not get note content"));
 }
 
 fn view_note_content(path: &String) {
-    termimad::print_text(&get_note_content(path).expect("Could not get note content"));
+    match get_note_content(path) {
+        Some(content) => {
+            termimad::print_text(&content);
+        },
+        None => println!("Could not get note content"),
+    }
 }
 
 fn delete_note(path: &String) {
@@ -204,16 +210,16 @@ fn delete_note(path: &String) {
     index.save(&index_path);
 }
 
-fn search_notes(query: &String, limit: &usize) {
-    let home_dir = var("HOME").expect("Could not get home directory");
-    let note_dir = format!("{}/.notes", &home_dir);
-    let index_path = format!("{}/index.json", &note_dir);
+fn search_notes(query: &String, limit: &usize, path: &Option<String>) {
+    let root = match get_note_or_index(path) {
+        Some(note) => note,
+        None => {
+            format!("No notes found at path: {:?}", path);
+            return;
+        },
+    };
 
-    create_dir_all(&note_dir).expect("Could not create save path");
-
-    let index = Note::new(&index_path); 
-
-    let results = index.key_word_search(query.as_str(), limit);
+    let results = root.key_word_search(query.as_str(), limit);
 
     for result in results {
         let (_, note) = result;
@@ -269,8 +275,8 @@ fn main() {
 
             delete_note(path);
         },
-        Commands::Search { query, limit } => {
-            search_notes(query, limit);
+        Commands::Search { query, limit, path } => {
+            search_notes(query, limit, path);
         },
         Commands::Echo { path } => {
             echo_note_content(path);

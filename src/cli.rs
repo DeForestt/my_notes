@@ -36,6 +36,8 @@ pub enum Commands {
         query: String,
         #[arg(short, long, default_value = "5", help = "number of results to return")]
         limit: usize,
+        #[arg(short, long, help = "search under a specific path")]
+        path: Option<String>,
     },
     #[clap(name = "echo", about = "echo a note")]
     Echo {
