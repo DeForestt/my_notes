@@ -250,6 +250,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
+name = "magic_string_search"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3cd32466b57096cbf19990ceafffa8944e82f3398ce74f2e6a8c4f8ad597a9c0"
+
+[[package]]
 name = "memoffset"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -284,6 +290,7 @@ name = "my-notes"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "magic_string_search",
  "serde",
  "serde_json",
  "termimad",

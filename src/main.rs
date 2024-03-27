@@ -1,7 +1,7 @@
 use std::{
     env::{temp_dir, var},
-    fs::{File, create_dir_all, OpenOptions, write},
-    io::{Read, self, Write},
+    fs::{create_dir_all, write, File, OpenOptions},
+    io::{self, Read, Write},
     process::Command,
 };
 
@@ -204,19 +204,27 @@ fn delete_note(path: &String) {
     index.save(&index_path);
 }
 
-fn search_notes(query: &String) {
+fn search_notes(query: &String, limit: &usize) {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
     let index_path = format!("{}/index.json", &note_dir);
 
     create_dir_all(&note_dir).expect("Could not create save path");
 
-    let index = Note::new(&index_path);
+    let index = Note::new(&index_path); 
 
-    let results = index.key_word_search(query.to_uppercase().as_str());
+    let results = index.key_word_search(query.as_str(), limit);
 
     for result in results {
-        println!("{}\n", result);
+        let (_, note) = result;
+        let mut res = note.get_file_path().to_string();
+        
+        if !res.ends_with(".md") {
+            continue;
+        }
+        res.truncate(res.len() - 3);
+        res = res.split("/").last().unwrap().to_string();
+        println!("{}", res);
     }
 }
 
@@ -261,8 +269,8 @@ fn main() {
 
             delete_note(path);
         },
-        Commands::Search { query } => {
-            search_notes(query);
+        Commands::Search { query, limit } => {
+            search_notes(query, limit);
         },
         Commands::Echo { path } => {
             echo_note_content(path);

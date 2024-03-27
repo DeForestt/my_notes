@@ -2,6 +2,8 @@ use std::fs::OpenOptions;
 
 use serde::{Deserialize, Serialize};
 
+use magic_string_search::{struct_rank, compare};
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Note {
     title: String,
@@ -120,6 +122,10 @@ impl Note {
         return &self.file_path;
     }
 
+    pub fn get_title(&self) -> &str {
+        return &self.title;
+    }
+
     pub fn remove_child(&mut self, path: Vec<&str>) -> Result<Vec<&str>, &str> {
         match self.get_child_mut(path) {
             Some(note) => {
@@ -156,20 +162,26 @@ impl Note {
         return Ok(());
     }
 
-    pub fn key_word_search(&self, key_word: &str) -> Vec<String> {
-        let mut path_list: Vec<String> = Vec::new();
-        if self.title.to_uppercase().contains(key_word) {
-            // remove .md from the end of the file path
-            let mut file_path = self.file_path.clone();
-            file_path.truncate(file_path.len() - 3);
-            // remove everything before the last slash
-            let mut file_path_parts: Vec<&str> = file_path.split("/").collect();
-            file_path = file_path_parts.pop().unwrap().to_string();
-            path_list.push(file_path);
+    fn search(&self, key_word: &str) -> Vec<&Note> {
+        let mut note_list: Vec<&Note> = Vec::new();
+        if compare(&self.title, key_word) > 0.0 {
+            note_list.push(self);
         }
+
         for child in &self.children {
-            path_list.append(&mut child.key_word_search(key_word));
+            note_list.append(&mut child.search(key_word));
         }
-        return path_list;
+        return note_list;
+    }
+
+    pub fn key_word_search(&self, key_word: &str, limit: &usize) -> Vec<(f64, &Note)> {
+        let note_list = self.search(key_word);
+
+        let ranked_list = struct_rank(key_word, note_list, |note| note.title.as_str());
+        if *limit > 0 {
+            return ranked_list.into_iter().take(*limit).collect();
+        }
+        return ranked_list;
+
     }
 }

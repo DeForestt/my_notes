@@ -34,6 +34,8 @@ pub enum Commands {
     #[clap(name = "search", about = "search notes")]
     Search {
         query: String,
+        #[arg(short, long, default_value = "5", help = "number of results to return")]
+        limit: usize,
     },
     #[clap(name = "echo", about = "echo a note")]
     Echo {
