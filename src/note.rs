@@ -2,7 +2,7 @@ use std::fs::OpenOptions;
 
 use serde::{Deserialize, Serialize};
 
-use magic_string_search::{struct_rank, compare};
+use magic_string_search::struct_rank;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Note {
@@ -162,26 +162,22 @@ impl Note {
         return Ok(());
     }
 
-    fn search(&self, key_word: &str) -> Vec<&Note> {
+    fn collect(&self) -> Vec<&Note> {
         let mut note_list: Vec<&Note> = Vec::new();
-        if compare(&self.title, key_word) > 0.0 {
-            note_list.push(self);
-        }
-
+        note_list.push(self);
         for child in &self.children {
-            note_list.append(&mut child.search(key_word));
+            note_list.append(&mut child.collect());
         }
         return note_list;
     }
 
     pub fn key_word_search(&self, key_word: &str, limit: &usize) -> Vec<(f64, &Note)> {
-        let note_list = self.search(key_word);
-
-        let ranked_list = struct_rank(key_word, note_list, |note| note.title.as_str());
+        let note_list = self.collect();
+        let ranked_list: Vec<(f64, &Note)> = struct_rank(key_word, note_list, |note| note.title.as_str())
+            .into_iter().filter(|(rank, _)| *rank > 0.0).collect();
         if *limit > 0 {
             return ranked_list.into_iter().take(*limit).collect();
         }
         return ranked_list;
-
     }
 }
