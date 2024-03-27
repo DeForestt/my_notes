@@ -5,7 +5,7 @@ edition = "2021"
 readme = "README.md"
 description = "A simple note taking app for taking hierarchical notes in markdown"
 license = "MIT"
-
+repository = "https://github.com/DeForestt/my_notes"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
