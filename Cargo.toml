@@ -2,7 +2,7 @@
 name = "my-notes"
 version = "1.0.0"
 edition = "2021"
-readme = "README.md"
+readme = "README.MD"
 description = "A simple note taking app for taking hierarchical notes in markdown"
 license = "MIT"
 repository = "https://github.com/DeForestt/my_notes"
