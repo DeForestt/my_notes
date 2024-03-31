@@ -160,7 +160,6 @@ fn echo_note_content(path: &String) {
         Some(content) => println!("{}", content),
         None => println!("Could not get note content"),
     }
-    println!("{}", get_note_content(path).expect("Could not get note content"));
 }
 
 fn view_note_content(path: &String) {
