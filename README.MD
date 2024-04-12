@@ -96,6 +96,25 @@ To use `My Notes`, follow these steps:
 - Notes are stored in the `~/.notes` directory.
 - The app organizes notes in a tree structure.
 
+## Using Search Registers
+- After searching for a keyword with the `search` subcommand, the search results are stored in the `.register` file.
+- You can now use the template `reg:<index>` to reference the value in the search register at a specific index. This will help avoid needing to type out the full path of the note.
+
+```bash
+my-notes search keyword
+
+#Output
+this.is.a.note_that_contains_keyword
+this.is.another.note_with_key_word
+
+my-notes edit reg:0 # edit this.is.a.note_that_contains_keyword
+my-notes edit reg:1 # edit this.is.another.note_with_key_word
+
+my-notes view reg:0 # view this.is.a.note_that_contains_keyword
+my-notes view reg:1 # view this.is.another.note_with_key_word
+```
+
+note: The search register is overwritten every time a new search is performed.
 ## Important
 - Deleting a note will permanently remove it and all of its children from the index and your local computer. This action cannot be undone.
 
