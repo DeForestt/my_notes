@@ -1,5 +1,5 @@
 use std::{
-    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command, sync::WaitTimeoutResult,
+    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command,
 };
 
 use cli::{Cli, Commands};
