@@ -1,5 +1,5 @@
 use std::{
-    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command
+    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command,
 };
 
 use cli::{Cli, Commands};
@@ -8,6 +8,33 @@ use clap::Parser;
 
 pub mod note;
 pub mod cli;
+
+
+fn read_from_register_file(index: usize) -> String {
+    let home = var("HOME").expect("Could not get home directory");
+    let file_path = format!("{}/.notes/.register", home);
+    let mut file = OpenOptions::new()
+        .read(true)
+        .open(file_path)
+        .expect("Could not open register file");
+    let mut content = String::new();
+    file.read_to_string(&mut content).expect("Could not read register file");
+    let lines: Vec<&str> = content.split("\n").collect();
+    
+    lines[index].to_string()
+}
+
+fn write_to_register_file(content: &str) {
+    let home = var("HOME").expect("Could not get home directory");
+    let file_path = format!("{}/.notes/.register", home);
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(file_path)
+        .expect("Could not open register file");
+    file.set_len(0).expect("Could not erase file");
+    file.write_all(content.as_bytes()).expect("Could not write to register file");
+}
 
 fn get_editor() -> String {
     var("EDITOR").unwrap_or_else(|_| "vim".to_string())
@@ -91,17 +118,27 @@ fn get_note(path: &String) -> Option<Note> {
 }
 
 fn get_note_or_index(path: &Option<String>) -> Option<Note> {
-    let home_dir = var("HOME").expect("Could not get home directory");
-    let note_dir = format!("{}/.notes", &home_dir);
-    let index_path = format!("{}/index.json", &note_dir);
-
-    create_dir_all(&note_dir).expect("Could not create save path");
-
-    let index = Note::new(&index_path);
 
     match path {
-        Some(path) => get_note(path),
-        None => Some(index),
+        Some(path) => {
+            let path = if path.starts_with("reg:") {
+                let index = path.split(":").collect::<Vec<&str>>()[1].parse::<usize>().expect("Could not parse index");
+                read_from_register_file(index)
+            } else {
+                path.to_owned()
+            };
+            get_note(&path)
+        },
+        None => {
+            let home_dir = var("HOME").expect("Could not get home directory");
+            let note_dir = format!("{}/.notes", &home_dir);
+            let index_path = format!("{}/index.json", &note_dir);
+        
+            create_dir_all(&note_dir).expect("Could not create save path");
+        
+            let index = Note::new(&index_path);
+            Some(index)
+        },
     }
 }
 
@@ -131,7 +168,7 @@ fn edit_note(path: &String) {
 }
 
 fn get_note_content(path: &String) -> Option<String> {
-    let note = match get_note(path) {
+    let note = match get_note_or_index(&Some(path.to_string())) {
         Some(note) => note,
         None => {
             return None;
@@ -144,7 +181,7 @@ fn get_note_content(path: &String) -> Option<String> {
         .expect("Could not open note file");
 
     let mut note_content = String::new();
-   match note_file.read_to_string(&mut note_content) {
+    match note_file.read_to_string(&mut note_content) {
         Ok(_) => {},
         Err(e) => {
             println!("Could not read note: {}", e);
@@ -219,7 +256,7 @@ fn search_notes(query: &String, limit: &usize, path: &Option<String>) {
     };
 
     let results = root.key_word_search(query.as_str(), limit);
-
+    let mut register_content = String::new();
     for result in results {
         let (_, note) = result;
         let mut res = note.get_file_path().to_string();
@@ -229,8 +266,11 @@ fn search_notes(query: &String, limit: &usize, path: &Option<String>) {
         }
         res.truncate(res.len() - 3);
         res = res.split("/").last().unwrap().to_string();
+        register_content.push_str(&res);
+        register_content.push_str("\n");
         println!("{}", res);
     }
+    write_to_register_file(&register_content);
 }
 
 fn main() {
