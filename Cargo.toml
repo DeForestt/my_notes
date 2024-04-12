@@ -1,6 +1,6 @@
 [package]
 name = "my-notes"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 readme = "README.MD"
 description = "A simple note taking app for taking hierarchical notes in markdown"

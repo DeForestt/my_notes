@@ -1,5 +1,5 @@
 use std::{
-    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command,
+    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command, sync::WaitTimeoutResult,
 };
 
 use cli::{Cli, Commands};
@@ -155,7 +155,7 @@ fn list_tree(path: &Option<String>) {
 }
 
 fn edit_note(path: &String) {
-    let note = match get_note(path) {
+    let note = match get_note_or_index(&Some(path.to_string())) {
         Some(note) => note,
         None => {
             println!("No note found at path: {:?}", path);
