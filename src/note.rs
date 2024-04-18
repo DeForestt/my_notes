@@ -31,6 +31,11 @@ impl Note {
         return note;
     }
 
+    fn get_lowercase_name(&self) -> String {
+        let title = self.title.to_lowercase();
+        title
+    }
+
     pub fn save(&self, save_path: &str) {
         let note_file = OpenOptions::new()
             .write(true)
@@ -173,7 +178,11 @@ impl Note {
 
     pub fn key_word_search(&self, key_word: &str, limit: &usize) -> Vec<(f64, &Note)> {
         let note_list = self.collect();
-        let ranked_list: Vec<(f64, &Note)> = struct_rank(key_word, note_list, |note| note.title.as_str())
+        
+        let binding = key_word.to_lowercase();
+        let key_word = binding.as_str();
+
+        let ranked_list: Vec<(f64, &Note)> = struct_rank(key_word, note_list, |&note| note.get_lowercase_name() )
             .into_iter().filter(|(rank, _)| *rank > 0.0).collect();
         if *limit > 0 {
             return ranked_list.into_iter().take(*limit).collect();

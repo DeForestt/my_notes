@@ -21,6 +21,10 @@ fn read_from_register_file(index: usize) -> String {
     file.read_to_string(&mut content).expect("Could not read register file");
     let lines: Vec<&str> = content.split("\n").collect();
     
+    if index > lines.len() {
+        panic!("register index is out of range")
+    } 
+
     lines[index].to_string()
 }
 
@@ -103,7 +107,7 @@ fn get_note(path: &String) -> Option<Note> {
     let home_dir = var("HOME").expect("Could not get home directory");
     let note_dir = format!("{}/.notes", &home_dir);
     let index_path = format!("{}/index.json", &note_dir);
-
+ 
     create_dir_all(&note_dir).expect("Could not create save path");
 
     let mut note_path_parts: Vec<&str> = path.split(".").collect();
@@ -255,20 +259,22 @@ fn search_notes(query: &String, limit: &usize, path: &Option<String>) {
         },
     };
 
-    let results = root.key_word_search(query.as_str(), limit);
+    let results = root.key_word_search(query.as_str(), limit).into_iter();
     let mut register_content = String::new();
-    for result in results {
+    let mut normalizer: usize = 0;
+    for (index, result) in results.enumerate() {
         let (_, note) = result;
         let mut res = note.get_file_path().to_string();
         
         if !res.ends_with(".md") {
+            normalizer = normalizer + 1;
             continue;
         }
         res.truncate(res.len() - 3);
         res = res.split("/").last().unwrap().to_string();
         register_content.push_str(&res);
         register_content.push_str("\n");
-        println!("{}", res);
+        println!("{}: {}", index - normalizer, res);
     }
     write_to_register_file(&register_content);
 }
