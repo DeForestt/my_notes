@@ -189,4 +189,24 @@ impl Note {
         }
         return ranked_list;
     }
+
+    pub fn collect_paths(&self) -> Vec<String> {
+        let mut paths = Vec::new();
+        self.collect_paths_inner(String::new(), &mut paths);
+        paths
+    }
+
+    fn collect_paths_inner(&self, prefix: String, paths: &mut Vec<String>) {
+        let mut current = prefix;
+        if self.title != "MyNotesRoot" {
+            if !current.is_empty() {
+                current.push('.');
+            }
+            current.push_str(&self.title);
+            paths.push(current.clone());
+        }
+        for child in &self.children {
+            child.collect_paths_inner(current.clone(), paths);
+        }
+    }
 }

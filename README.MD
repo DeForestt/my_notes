@@ -44,6 +44,8 @@ To use `My Notes`, follow these steps:
   - Usage: `my-notes version`
 - `view` - View a note with rendered markdown.
   - Usage: `my-notes view <path>`
+- `completions` - Generate shell completion scripts.
+  - Usage: `my-notes completions <bash|zsh|fish|powershell|elvish>`
 
 ### Examples
 - Create a new note:
@@ -90,6 +92,11 @@ To use `My Notes`, follow these steps:
   ```
   my-notes help
   ```
+- Generate bash completions:
+  ```
+  my-notes completions bash > /usr/share/bash-completion/completions/my-notes
+  ```
+  Note names will now tab-complete for commands like `view`, `edit`, and `rm`.
 
 ## Notes
 - The app uses the default system editor. Set the `EDITOR` environment variable to change it.
