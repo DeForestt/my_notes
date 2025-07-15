@@ -1,6 +1,6 @@
 [package]
 name = "my-notes"
-version = "1.4.0"
+version = "1.4.1"
 edition = "2021"
 readme = "README.MD"
 description = "A simple note taking app for taking hierarchical notes in markdown"
@@ -14,4 +14,5 @@ serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.105"
 termimad = "0.23.0"
 magic_string_search = "0.2.0"
-clap_complete = { version = "4.5.3", features = ["unstable-dynamic"] }
+// make this the max version of clap_complete
+clap_complete = { version = "=4.5.3", features = ["unstable-dynamic"] }
