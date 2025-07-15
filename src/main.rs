@@ -1,10 +1,13 @@
 use std::{
-    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command,
+    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command as ProcessCommand,
 };
 
 use cli::{Cli, Commands};
 use note::Note;
-use clap::Parser;
+use clap::{Command as ClapCommand, FromArgMatches, CommandFactory, Subcommand};
+use clap_complete::{generate, Shell};
+use clap_complete::dynamic::shells::CompleteCommand;
+use clap::builder::{PossibleValue, PossibleValuesParser};
 
 pub mod note;
 pub mod cli;
@@ -40,6 +43,38 @@ fn write_to_register_file(content: &str) {
     file.write_all(content.as_bytes()).expect("Could not write to register file");
 }
 
+fn build_cli() -> ClapCommand {
+    let cmd = Cli::command();
+    CompleteCommand::augment_subcommands(cmd)
+}
+
+fn add_note_completions(cmd: &mut ClapCommand) {
+    if let Some(root) = get_note_or_index(&None) {
+        let paths = root.collect_paths();
+        let leaked: Vec<&'static str> = paths
+            .into_iter()
+            .map(|p| Box::leak(p.into_boxed_str()) as &'static str)
+            .collect();
+        let values: Vec<PossibleValue> = leaked
+            .iter()
+            .map(|p| PossibleValue::new(*p))
+            .collect();
+        let parser = PossibleValuesParser::new(values.clone());
+        for sc_name in ["edit", "rm", "echo", "view", "ls", "search"] {
+            *cmd = std::mem::take(cmd).mut_subcommand(sc_name, |sub| {
+                sub.mut_arg("path", |a| a.value_parser(parser.clone()))
+            });
+        }
+    }
+}
+
+fn print_completions(shell: Shell) {
+    let mut cmd = build_cli();
+    add_note_completions(&mut cmd);
+    let name = cmd.get_name().to_string();
+    generate(shell, &mut cmd, name, &mut std::io::stdout());
+}
+
 fn get_editor() -> String {
     var("EDITOR").unwrap_or_else(|_| "vim".to_string())
 }
@@ -52,7 +87,7 @@ fn create_temp_file() -> String {
 }
 
 fn open_editor(file_path: &str) {
-    Command::new(get_editor())
+    ProcessCommand::new(get_editor())
         .arg(file_path)
         .status()
         .expect("Something went wrong");
@@ -280,7 +315,16 @@ fn search_notes(query: &String, limit: &usize, path: &Option<String>) {
 }
 
 fn main() {
-    let cli: Cli = Cli::parse();
+    let mut cmd = build_cli();
+    add_note_completions(&mut cmd);
+    let matches = cmd.clone().get_matches();
+
+    if let Ok(completions) = CompleteCommand::from_arg_matches(&matches) {
+        completions.complete(&mut cmd);
+        return;
+    }
+
+    let cli = Cli::from_arg_matches(&matches).expect("Failed to parse CLI args");
 
     match &cli.command {
         Commands::New { path, content, blank} => {
@@ -328,6 +372,9 @@ fn main() {
         },
         Commands::View { path } => {
             view_note_content(path);
+        },
+        Commands::Completions { shell } => {
+            print_completions(*shell);
         },
     }
 }

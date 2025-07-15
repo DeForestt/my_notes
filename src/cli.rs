@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_complete::Shell;
 
 #[derive(Parser, Debug)]
 #[clap(name = "my-notes", version = "1.3.0", about = "A simple note taking app")]
@@ -46,5 +47,10 @@ pub enum Commands {
     #[clap(name = "view", about = "view a note with rendered markdown")]
     View {
         path: String,
+    },
+    #[clap(name = "completions", about = "generate shell completion script")]
+    Completions {
+        #[arg(value_enum)]
+        shell: Shell,
     },
 }
