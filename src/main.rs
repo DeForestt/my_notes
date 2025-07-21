@@ -1,5 +1,8 @@
 use std::{
-    env::{temp_dir, var}, fs::{create_dir_all, write, File, OpenOptions}, io::{self, Read, Write}, process::Command as ProcessCommand,
+    env::{temp_dir, var},
+    fs::{create_dir_all, read_dir, write, File, OpenOptions},
+    io::{self, Read, Write},
+    process::Command as ProcessCommand,
 };
 
 use cli::{Cli, Commands};
@@ -48,9 +51,30 @@ fn build_cli() -> ClapCommand {
     CompleteCommand::augment_subcommands(cmd)
 }
 
+fn collect_paths_from_fs() -> Option<Vec<String>> {
+    let home_dir = var("HOME").ok()?;
+    let note_dir = format!("{}/.notes", home_dir);
+    let entries = read_dir(note_dir).ok()?;
+    let mut paths = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() {
+            if let Some(ext) = path.extension() {
+                if ext == "md" {
+                    if let Some(stem) = path.file_stem() {
+                        if let Some(name) = stem.to_str() {
+                            paths.push(name.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Some(paths)
+}
+
 fn add_note_completions(cmd: &mut ClapCommand) {
-    if let Some(root) = get_note_or_index(&None) {
-        let paths = root.collect_paths();
+    if let Some(paths) = collect_paths_from_fs() {
         let leaked: Vec<&'static str> = paths
             .into_iter()
             .map(|p| Box::leak(p.into_boxed_str()) as &'static str)
