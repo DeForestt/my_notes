@@ -1,5 +1,6 @@
 use std::{
     env::{temp_dir, var},
+    ffi::OsStr,
     fs::{create_dir_all, read_dir, write, File, OpenOptions},
     io::{self, Read, Write},
     process::Command as ProcessCommand,
@@ -10,7 +11,7 @@ use note::Note;
 use clap::{Command as ClapCommand, FromArgMatches, CommandFactory, Subcommand};
 use clap_complete::{generate, Shell};
 use clap_complete::dynamic::shells::CompleteCommand;
-use clap::builder::{PossibleValue, PossibleValuesParser};
+use clap::builder::{PossibleValue, PossibleValuesParser, TypedValueParser};
 
 pub mod note;
 pub mod cli;
@@ -73,6 +74,44 @@ fn collect_paths_from_fs() -> Option<Vec<String>> {
     Some(paths)
 }
 
+#[derive(Clone)]
+struct RegOrNoteParser {
+    inner: PossibleValuesParser,
+}
+
+impl RegOrNoteParser {
+    fn new(values: Vec<PossibleValue>) -> Self {
+        Self {
+            inner: PossibleValuesParser::new(values),
+        }
+    }
+}
+
+impl TypedValueParser for RegOrNoteParser {
+    type Value = String;
+
+    fn parse_ref(
+        &self,
+        cmd: &clap::Command,
+        arg: Option<&clap::Arg>,
+        value: &OsStr,
+    ) -> Result<Self::Value, clap::Error> {
+        if let Some(value) = value.to_str() {
+            if let Some(index) = value.strip_prefix("reg:") {
+                if index.parse::<usize>().is_ok() {
+                    return Ok(value.to_string());
+                }
+            }
+        }
+
+        self.inner.parse_ref(cmd, arg, value)
+    }
+
+    fn possible_values(&self) -> Option<Box<dyn Iterator<Item = PossibleValue> + '_>> {
+        self.inner.possible_values()
+    }
+}
+
 fn add_note_completions(cmd: &mut ClapCommand) {
     if let Some(paths) = collect_paths_from_fs() {
         let leaked: Vec<&'static str> = paths
@@ -83,7 +122,7 @@ fn add_note_completions(cmd: &mut ClapCommand) {
             .iter()
             .map(|p| PossibleValue::new(*p))
             .collect();
-        let parser = PossibleValuesParser::new(values.clone());
+        let parser = RegOrNoteParser::new(values);
         for sc_name in ["edit", "rm", "echo", "view", "ls", "search"] {
             *cmd = std::mem::take(cmd).mut_subcommand(sc_name, |sub| {
                 sub.mut_arg("path", |a| a.value_parser(parser.clone()))
